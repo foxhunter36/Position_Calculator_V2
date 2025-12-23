@@ -110,28 +110,75 @@ with col2:
 
 st.markdown("---")
 
+# TP Level Selection
+tp_count = st.selectbox("NUMBER OF TAKE-PROFIT LEVELS", options=[2, 3, 4], index=1, key="tp_count")
+
+st.markdown("---")
+
 col1, col2 = st.columns(2)
 with col1:
     entry_price = st.number_input("ENTRY PRICE", min_value=0.0, value=0.0, step=0.01, key="entry", format="%.2f")
-    tp1_price = st.number_input("TARGET 1", min_value=0.0, value=0.0, step=0.01, key="tp1", format="%.2f")
-    tp3_price = st.number_input("TARGET 3", min_value=0.0, value=0.0, step=0.01, key="tp3", format="%.2f")
 with col2:
     sl_price = st.number_input("STOP LOSS", min_value=0.0, value=0.0, step=0.01, key="sl", format="%.2f")
-    tp2_price = st.number_input("TARGET 2", min_value=0.0, value=0.0, step=0.01, key="tp2", format="%.2f")
+
+# Dynamic TP inputs based on selection
+st.markdown("---")
+st.subheader("TARGET LEVELS")
+
+if tp_count == 2:
+    col1, col2 = st.columns(2)
+    with col1:
+        tp1_price = st.number_input("TARGET 1 [50%]", min_value=0.0, value=0.0, step=0.01, key="tp1", format="%.2f")
+    with col2:
+        tp2_price = st.number_input("TARGET 2 [50%]", min_value=0.0, value=0.0, step=0.01, key="tp2", format="%.2f")
+    tp3_price = None
+    tp4_price = None
+elif tp_count == 3:
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        tp1_price = st.number_input("TARGET 1 [33%]", min_value=0.0, value=0.0, step=0.01, key="tp1", format="%.2f")
+    with col2:
+        tp2_price = st.number_input("TARGET 2 [33%]", min_value=0.0, value=0.0, step=0.01, key="tp2", format="%.2f")
+    with col3:
+        tp3_price = st.number_input("TARGET 3 [34%]", min_value=0.0, value=0.0, step=0.01, key="tp3", format="%.2f")
+    tp4_price = None
+else:  # tp_count == 4
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        tp1_price = st.number_input("TARGET 1 [25%]", min_value=0.0, value=0.0, step=0.01, key="tp1", format="%.2f")
+    with col2:
+        tp2_price = st.number_input("TARGET 2 [25%]", min_value=0.0, value=0.0, step=0.01, key="tp2", format="%.2f")
+    with col3:
+        tp3_price = st.number_input("TARGET 3 [25%]", min_value=0.0, value=0.0, step=0.01, key="tp3", format="%.2f")
+    with col4:
+        tp4_price = st.number_input("TARGET 4 [25%]", min_value=0.0, value=0.0, step=0.01, key="tp4", format="%.2f")
 
 # Calculate Button
 if st.button("EXECUTE CALCULATION", type="primary", use_container_width=True):
-    
+
+    # Build TP list based on count
+    tp_prices = [tp1_price, tp2_price]
+    if tp_count >= 3:
+        tp_prices.append(tp3_price)
+    if tp_count == 4:
+        tp_prices.append(tp4_price)
+
     # Check if all fields are filled
-    if capital == 0.0 or risk_pct == 0.0 or entry_price == 0.0 or sl_price == 0.0 or tp1_price == 0.0 or tp2_price == 0.0 or tp3_price == 0.0:
+    if capital == 0.0 or risk_pct == 0.0 or entry_price == 0.0 or sl_price == 0.0:
         st.error("ERROR: INCOMPLETE DATA")
         st.stop()
-    
-    # Erkenne ob Long oder Short
-    if tp3_price > entry_price:
+
+    for i, tp in enumerate(tp_prices, 1):
+        if tp == 0.0:
+            st.error(f"ERROR: TARGET {i} NOT SET")
+            st.stop()
+
+    # Erkenne ob Long oder Short (use last TP for direction)
+    last_tp = tp_prices[-1]
+    if last_tp > entry_price:
         trade_direction = "LONG"
         is_long = True
-    elif tp3_price < entry_price:
+    elif last_tp < entry_price:
         trade_direction = "SHORT"
         is_long = False
     else:
@@ -145,38 +192,53 @@ if st.button("EXECUTE CALCULATION", type="primary", use_container_width=True):
     elif not is_long and sl_price <= entry_price:
         st.error("ERROR: INVALID STOP LOSS FOR SHORT POSITION")
         st.stop()
-    
+
     # Validiere TP Reihenfolge
     if is_long:
-        if tp1_price <= entry_price or tp2_price <= entry_price or tp3_price <= entry_price:
-            st.error("ERROR: TARGETS MUST EXCEED ENTRY FOR LONG")
-            st.stop()
-        if not (tp1_price < tp2_price < tp3_price):
-            st.error("ERROR: TARGETS MUST BE IN ORDER: TP1 < TP2 < TP3")
-            st.stop()
+        for tp in tp_prices:
+            if tp <= entry_price:
+                st.error("ERROR: TARGETS MUST EXCEED ENTRY FOR LONG")
+                st.stop()
+        # Check ascending order
+        for i in range(len(tp_prices) - 1):
+            if tp_prices[i] >= tp_prices[i + 1]:
+                st.error(f"ERROR: TARGETS MUST BE IN ASCENDING ORDER")
+                st.stop()
     else:
-        if tp1_price >= entry_price or tp2_price >= entry_price or tp3_price >= entry_price:
-            st.error("ERROR: TARGETS MUST BE BELOW ENTRY FOR SHORT")
-            st.stop()
-        if not (tp1_price > tp2_price > tp3_price):
-            st.error("ERROR: TARGETS MUST BE IN ORDER: TP1 > TP2 > TP3")
-            st.stop()
+        for tp in tp_prices:
+            if tp >= entry_price:
+                st.error("ERROR: TARGETS MUST BE BELOW ENTRY FOR SHORT")
+                st.stop()
+        # Check descending order
+        for i in range(len(tp_prices) - 1):
+            if tp_prices[i] <= tp_prices[i + 1]:
+                st.error(f"ERROR: TARGETS MUST BE IN DESCENDING ORDER")
+                st.stop()
     
+    # Calculate percentage splits based on TP count
+    if tp_count == 2:
+        tp_splits = [0.50, 0.50]
+    elif tp_count == 3:
+        tp_splits = [0.33, 0.33, 0.34]
+    else:  # tp_count == 4
+        tp_splits = [0.25, 0.25, 0.25, 0.25]
+
     # Berechne SL und TP in Prozent
     sl_distance = abs((entry_price - sl_price) / entry_price) * 100
-    tp1_distance = abs((tp1_price - entry_price) / entry_price) * 100
-    tp2_distance = abs((tp2_price - entry_price) / entry_price) * 100
-    tp3_distance = abs((tp3_price - entry_price) / entry_price) * 100
-    
-    # ECHTES Risk/Reward mit 33/33/33 Split
-    tp1_profit_pct = tp1_distance * 0.33
-    tp2_profit_pct = tp2_distance * 0.33
-    tp3_profit_pct = tp3_distance * 0.33
-    
-    # Echtes R/R
-    risk_reward_tp1 = tp1_profit_pct / sl_distance
-    risk_reward_tp2 = tp2_profit_pct / sl_distance
-    risk_reward_tp3 = tp3_profit_pct / sl_distance
+
+    tp_distances = []
+    tp_profit_pcts = []
+    risk_rewards = []
+
+    for i, tp_price in enumerate(tp_prices):
+        tp_distance = abs((tp_price - entry_price) / entry_price) * 100
+        tp_distances.append(tp_distance)
+
+        tp_profit_pct = tp_distance * tp_splits[i]
+        tp_profit_pcts.append(tp_profit_pct)
+
+        risk_reward = tp_profit_pct / sl_distance
+        risk_rewards.append(risk_reward)
     
     # Position Size Berechnung
     risk_amount = capital * (risk_pct / 100)
@@ -192,41 +254,40 @@ if st.button("EXECUTE CALCULATION", type="primary", use_container_width=True):
     
     # Potentielle Gewinne/Verluste
     potential_loss = risk_amount
-    profit_at_tp1 = (position_size * 0.33) * (tp1_distance / 100)
-    profit_at_tp2 = (position_size * 0.33) * (tp2_distance / 100)
-    profit_at_tp3 = (position_size * 0.34) * (tp3_distance / 100)  # 0.34 wegen rounding
-    potential_profit_total = profit_at_tp1 + profit_at_tp2 + profit_at_tp3
-    avg_risk_reward = (risk_reward_tp1 + risk_reward_tp2 + risk_reward_tp3) / 3
+    profits_at_tps = []
+
+    for i in range(tp_count):
+        profit = (position_size * tp_splits[i]) * (tp_distances[i] / 100)
+        profits_at_tps.append(profit)
+
+    potential_profit_total = sum(profits_at_tps)
+    avg_risk_reward = sum(risk_rewards) / tp_count
     
     # Output
     st.markdown("---")
-    
+
     # Trade Analysis mit Direction rechts
     col1, col2 = st.columns([3, 1])
     with col1:
         st.markdown("**TRADE ANALYSIS**")
     with col2:
         st.markdown(f"**DIRECTION: {trade_direction}**")
-    
+
     # Entry und SL in 2 Spalten
     col1, col2 = st.columns(2)
     with col1:
         st.markdown(f"ENTRY: `${entry_price:.2f}`")
     with col2:
         st.markdown(f"SL: `${sl_price:.2f} ({sl_distance:.2f}%)`")
-    
-    # Target 1, 2, 3 in 3 Spalten
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown(f"TARGET 1 [33%]: `${tp1_price:.2f} ({tp1_distance:.2f}%)`")
-        st.markdown(f"RR: `1:{risk_reward_tp1:.2f}`")
-    with col2:
-        st.markdown(f"TARGET 2 [33%]: `${tp2_price:.2f} ({tp2_distance:.2f}%)`")
-        st.markdown(f"RR: `1:{risk_reward_tp2:.2f}`")
-    with col3:
-        st.markdown(f"TARGET 3 [34%]: `${tp3_price:.2f} ({tp3_distance:.2f}%)`")
-        st.markdown(f"RR: `1:{risk_reward_tp3:.2f}`")
-    
+
+    # Dynamic Target display based on TP count
+    cols = st.columns(tp_count)
+    for i in range(tp_count):
+        with cols[i]:
+            split_pct = int(tp_splits[i] * 100)
+            st.markdown(f"TARGET {i+1} [{split_pct}%]: `${tp_prices[i]:.2f} ({tp_distances[i]:.2f}%)`")
+            st.markdown(f"RR: `1:{risk_rewards[i]:.2f}`")
+
     st.markdown(f"**AVERAGE RISK/REWARD: `1:{avg_risk_reward:.2f}`**")
     
     st.markdown("---")
@@ -239,7 +300,10 @@ if st.button("EXECUTE CALCULATION", type="primary", use_container_width=True):
     
     # P&L
     st.markdown("**PROFIT & LOSS PROJECTION**")
-    st.markdown(f"MAX LOSS: `${potential_loss:.2f}` | TP1: `${profit_at_tp1:.2f}` | TP2: `${profit_at_tp2:.2f}` | TP3: `${profit_at_tp3:.2f}`")
+
+    # Build dynamic profit display
+    tp_profit_str = " | ".join([f"TP{i+1}: `${profits_at_tps[i]:.2f}`" for i in range(tp_count)])
+    st.markdown(f"MAX LOSS: `${potential_loss:.2f}` | {tp_profit_str}")
     st.markdown(f"TOTAL PROFIT: `${potential_profit_total:.2f}`")
     
     # Warnings kompakt
