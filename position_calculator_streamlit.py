@@ -37,13 +37,25 @@ st.markdown("""
         font-family: 'Courier New', monospace !important;
     }
     
+    /* Plus/Minus Buttons - Matrix Green */
+    .stNumberInput button {
+        background-color: #0d1117 !important;
+        color: #00ff41 !important;
+        border: 1px solid #00ff41 !important;
+    }
+    
+    .stNumberInput button:hover {
+        background-color: #00ff41 !important;
+        color: #000000 !important;
+    }
+    
     /* Labels */
     label {
         color: #00ff41 !important;
         font-family: 'Courier New', monospace !important;
     }
     
-    /* Button */
+    /* Regular Buttons (TP Selection) */
     .stButton button {
         background-color: #0d1117 !important;
         color: #00ff41 !important;
@@ -52,6 +64,7 @@ st.markdown("""
         font-weight: bold !important;
         box-shadow: 0 0 10px #00ff41 !important;
         letter-spacing: 2px;
+        transition: all 0.3s ease !important;
     }
     
     .stButton button:hover {
@@ -60,12 +73,34 @@ st.markdown("""
         box-shadow: 0 0 20px #00ff41 !important;
     }
     
-    /* Success/Error boxes */
+    /* Execute Button - Special styling with white text on hover */
+    div[data-testid="column"] > div > div > div > button[kind="primary"] {
+        background-color: #0d1117 !important;
+        color: #00ff41 !important;
+        border: 2px solid #00ff41 !important;
+        font-family: 'Courier New', monospace !important;
+        font-weight: bold !important;
+        letter-spacing: 2px;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 0 10px #00ff41 !important;
+    }
+    
+    div[data-testid="column"] > div > div > div > button[kind="primary"]:hover {
+        background-color: #00ff41 !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 0 40px #00ff41 !important;
+    }
+    
+    /* Success/Error boxes - centered text */
     .stSuccess, .stError {
         background-color: #0d1117 !important;
         border: 1px solid #00ff41 !important;
         color: #00ff41 !important;
         font-family: 'Courier New', monospace !important;
+        text-align: center !important;
+    }
+    
+    .stSuccess > div, .stError > div {
         text-align: center !important;
     }
     
@@ -81,6 +116,16 @@ st.markdown("""
         font-family: 'Courier New', monospace !important;
         opacity: 0.7;
     }
+    
+    /* Blinking Cursor Animation */
+    @keyframes blink-cursor {
+        0%, 49% {
+            border-right-color: #00ff41;
+        }
+        50%, 100% {
+            border-right-color: transparent;
+        }
+    }
 </style>
 
 <script>
@@ -95,10 +140,43 @@ st.markdown("""
             }
         }
     });
+    
+    // Typewriter effect for title - more robust version
+    function initTypewriter() {
+        const title = document.querySelector('h1');
+        if (title && !title.dataset.typed) {
+            title.dataset.typed = 'true';
+            const text = 'POSITION CALC';
+            title.textContent = '';
+            title.style.borderRight = '3px solid #00ff41';
+            title.style.animation = 'blink-cursor 1s step-end infinite';
+            title.style.display = 'inline-block';
+            title.style.paddingRight = '8px';
+            
+            let i = 0;
+            const typeWriter = setInterval(() => {
+                if (i < text.length) {
+                    title.textContent += text.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(typeWriter);
+                }
+            }, 80);
+        }
+    }
+    
+    // Try multiple times to catch the title
+    setTimeout(initTypewriter, 100);
+    setTimeout(initTypewriter, 300);
+    setTimeout(initTypewriter, 500);
+    
+    // Also watch for DOM changes
+    const observer = new MutationObserver(initTypewriter);
+    observer.observe(document.body, { childList: true, subtree: true });
 </script>
 """, unsafe_allow_html=True)
 
-st.title("POSITION CALC")
+st.title("POSITION CALCULATOR")
 
 # Inputs
 st.subheader("SYSTEM INPUT")
@@ -110,8 +188,28 @@ with col2:
 
 st.markdown("---")
 
-# TP Level Selection
-tp_count = st.selectbox("NUMBER OF TAKE-PROFIT LEVELS", options=[2, 3, 4], index=1, key="tp_count")
+# TP Level Selection with Buttons
+st.subheader("NUMBER OF TAKE-PROFIT LEVELS")
+
+# Initialize session state for tp_count if it doesn't exist
+if 'tp_count' not in st.session_state:
+    st.session_state.tp_count = 3
+
+col1, col2, col3, col4 = st.columns(4)
+with col1:
+    if st.button("1", use_container_width=True, key="btn_1"):
+        st.session_state.tp_count = 1
+with col2:
+    if st.button("2", use_container_width=True, key="btn_2"):
+        st.session_state.tp_count = 2
+with col3:
+    if st.button("3", use_container_width=True, key="btn_3"):
+        st.session_state.tp_count = 3
+with col4:
+    if st.button("4", use_container_width=True, key="btn_4"):
+        st.session_state.tp_count = 4
+
+tp_count = st.session_state.tp_count
 
 st.markdown("---")
 
@@ -125,7 +223,12 @@ with col2:
 st.markdown("---")
 st.subheader("TARGET LEVELS")
 
-if tp_count == 2:
+if tp_count == 1:
+    tp1_price = st.number_input("TARGET 1 [100%]", min_value=0.0, value=0.0, step=0.01, key="tp1", format="%.2f")
+    tp2_price = None
+    tp3_price = None
+    tp4_price = None
+elif tp_count == 2:
     col1, col2 = st.columns(2)
     with col1:
         tp1_price = st.number_input("TARGET 1 [50%]", min_value=0.0, value=0.0, step=0.01, key="tp1", format="%.2f")
@@ -157,11 +260,14 @@ else:  # tp_count == 4
 if st.button("EXECUTE CALCULATION", type="primary", use_container_width=True):
 
     # Build TP list based on count
-    tp_prices = [tp1_price, tp2_price]
-    if tp_count >= 3:
-        tp_prices.append(tp3_price)
-    if tp_count == 4:
-        tp_prices.append(tp4_price)
+    if tp_count == 1:
+        tp_prices = [tp1_price]
+    elif tp_count == 2:
+        tp_prices = [tp1_price, tp2_price]
+    elif tp_count == 3:
+        tp_prices = [tp1_price, tp2_price, tp3_price]
+    else:  # tp_count == 4
+        tp_prices = [tp1_price, tp2_price, tp3_price, tp4_price]
 
     # Check if all fields are filled
     if capital == 0.0 or risk_pct == 0.0 or entry_price == 0.0 or sl_price == 0.0:
@@ -216,7 +322,9 @@ if st.button("EXECUTE CALCULATION", type="primary", use_container_width=True):
                 st.stop()
     
     # Calculate percentage splits based on TP count
-    if tp_count == 2:
+    if tp_count == 1:
+        tp_splits = [1.00]
+    elif tp_count == 2:
         tp_splits = [0.50, 0.50]
     elif tp_count == 3:
         tp_splits = [0.33, 0.33, 0.34]
@@ -323,6 +431,6 @@ if st.button("EXECUTE CALCULATION", type="primary", use_container_width=True):
     st.markdown("---")
     
     if avg_risk_reward >= 2:
-        st.success("STATUS: TRADE APPROVED - PROCEED WITH EXECUTION")
+        st.success("YOU HEARD THE MONKEY - MAKE THE TRADE")
     else:
-        st.error(f"STATUS: TRADE REJECTED - INSUFFICIENT RISK/REWARD [1:{avg_risk_reward:.2f}]")
+        st.error(f"TRADE REJECTED - INSUFFICIENT RISK/REWARD [1:{avg_risk_reward:.2f}]")
