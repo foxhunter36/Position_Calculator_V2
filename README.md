@@ -46,4 +46,4 @@ Die App validiert automatisch:
 
 ---
 
-Made with ☕ by Andre
+Made with lots of ☕ by Andre
