@@ -1,0 +1,375 @@
+# 💻 TERMINAL COMMANDS CHEAT SHEET (Windows)
+
+## 🕹️ DOS Nostalgia - Was du schon kennst!
+
+| DOS (damals) | Windows CMD (heute) | Was es macht |
+|--------------|---------------------|--------------|
+| `dir` | `dir` | Zeigt Dateien im Ordner ✅ Gleich! |
+| `cd` | `cd` | Change Directory ✅ Gleich! |
+| `cd..` | `cd..` | Eine Ebene hoch ✅ Gleich! |
+| `md` / `mkdir` | `mkdir` | Neuen Ordner erstellen |
+| `del` | `del` | Datei löschen |
+| `copy` | `copy` | Datei kopieren |
+| `cls` | `cls` | Screen löschen ✅ Gleich! |
+| `type` | `type` | Datei-Inhalt anzeigen |
+
+**Die Basics sind gleich geblieben!** 🎯
+
+---
+
+## 📁 NAVIGATION (das wichtigste!)
+
+### Wo bin ich?
+```cmd
+cd
+# Zeigt aktuellen Pfad
+```
+
+### Ordner wechseln
+```cmd
+cd C:\Projects
+cd position-calculator-matrix
+cd ..                           # Eine Ebene zurück (wie DOS!)
+cd ..\..                        # Zwei Ebenen zurück
+```
+
+### Laufwerk wechseln (WICHTIG auf Windows!)
+```cmd
+C:                              # Zu C:\ wechseln
+D:                              # Zu D:\ wechseln
+cd /d D:\Projects               # Laufwerk UND Ordner wechseln
+```
+
+### Ordner-Inhalt anzeigen
+```cmd
+dir                             # Alle Dateien/Ordner
+dir /w                          # Wide format (übersichtlicher)
+dir *.py                        # Nur Python-Dateien
+dir /s                          # Inklusive Unterordner
+```
+
+---
+
+## 📂 ORDNER & DATEIEN VERWALTEN
+
+### Ordner erstellen
+```cmd
+mkdir new-project
+mkdir C:\Projects\test-app
+```
+
+### Ordner löschen
+```cmd
+rmdir ordner-name               # Nur wenn leer
+rmdir /s ordner-name            # Mit Inhalt (fragt nach!)
+rmdir /s /q ordner-name         # Mit Inhalt, ohne Nachfrage
+```
+
+### Datei erstellen (leer)
+```cmd
+type nul > test.txt             # Leere Datei
+echo Hello > test.txt           # Mit Inhalt
+```
+
+### Datei anzeigen
+```cmd
+type README.md                  # Ganzen Inhalt anzeigen
+more README.md                  # Mit Pause (bei langen Dateien)
+```
+
+### Datei kopieren
+```cmd
+copy app.py app_backup.py
+copy *.py backup\               # Alle .py Dateien in backup\
+```
+
+### Datei umbenennen
+```cmd
+ren old_name.py new_name.py
+```
+
+### Datei löschen
+```cmd
+del test.txt
+del *.log                       # Alle .log Dateien
+```
+
+### Datei verschieben
+```cmd
+move app.py archive\
+```
+
+---
+
+## 🔍 SUCHEN & FINDEN
+
+### Datei finden
+```cmd
+dir /s /b *.py                  # Alle Python-Dateien rekursiv
+dir /s /b *calculator*          # Alle Dateien mit "calculator"
+```
+
+### Text in Datei suchen
+```cmd
+find "def calculate" app.py     # Sucht String in Datei
+findstr "calculate" *.py        # Sucht in allen .py Dateien
+```
+
+---
+
+## 🎨 NÜTZLICHE COMMANDS
+
+### Screen löschen
+```cmd
+cls                             # Clear screen (wie DOS!)
+```
+
+### Command wiederholen
+```cmd
+Pfeil hoch ⬆️                   # Letzte Commands durchgehen
+```
+
+### Mehrere Commands in einer Zeile
+```cmd
+cd C:\Projects && dir           # && = "und dann"
+mkdir test && cd test           # Ordner erstellen UND reinwechseln
+```
+
+### Command-Output in Datei speichern
+```cmd
+dir > filelist.txt              # Überschreibt Datei
+dir >> filelist.txt             # Hängt an Datei an
+```
+
+### Aktuelles Datum/Zeit
+```cmd
+date /t                         # Datum
+time /t                         # Zeit
+```
+
+### Hilfe zu einem Command
+```cmd
+dir /?                          # Zeigt alle dir Optionen
+git --help                      # Git Hilfe
+```
+
+---
+
+## 🐍 PYTHON COMMANDS
+
+### Python ausführen
+```cmd
+python app.py                   # Python-Script starten
+python --version                # Zeigt Python Version
+```
+
+### Pip (Package Manager)
+```cmd
+pip install streamlit           # Package installieren
+pip install -r requirements.txt # Alle packages aus File
+pip list                        # Zeigt installierte packages
+pip show streamlit              # Info zu einem package
+pip uninstall streamlit         # Package deinstallieren
+```
+
+### Virtual Environment (später nützlich)
+```cmd
+python -m venv venv             # Erstellt venv Ordner
+venv\Scripts\activate           # Aktiviert venv
+deactivate                      # Deaktiviert venv
+```
+
+---
+
+## 🚀 STREAMLIT COMMANDS
+
+```cmd
+streamlit run app.py            # Startet Streamlit App
+streamlit run app.py --server.port 8502  # Anderer Port
+Ctrl + C                        # Stoppt Streamlit Server
+```
+
+---
+
+## 🔧 GIT COMMANDS (Recap)
+
+### Setup & Info
+```cmd
+git init                        # Git in Ordner aktivieren
+git status                      # Zeigt Änderungen
+git log                         # Zeigt Commit-History
+git log --oneline               # Kompakte History
+```
+
+### Standard Workflow
+```cmd
+git add .                       # Alle Änderungen stagen
+git add datei.py                # Einzelne Datei stagen
+git commit -m "Message"         # Lokaler Checkpoint
+git push                        # Zu GitHub hochladen
+git pull                        # Von GitHub runterladen
+```
+
+### Erste Verbindung zu GitHub
+```cmd
+git remote add origin https://github.com/user/repo.git
+git push -u origin main
+```
+
+### Branches (Advanced)
+```cmd
+git branch                      # Zeigt alle Branches
+git branch feature-xyz          # Neuen Branch erstellen
+git checkout feature-xyz        # Zu Branch wechseln
+git checkout main               # Zurück zu main
+```
+
+---
+
+## 🔐 ANACONDA COMMANDS (wenn installiert)
+
+```cmd
+conda --version                 # Zeigt Conda Version
+conda list                      # Zeigt packages
+conda create -n myenv python=3.11  # Neue Environment
+conda activate myenv            # Environment aktivieren
+conda deactivate                # Environment deaktivieren
+```
+
+---
+
+## ⚡ POWER USER TRICKS
+
+### Schnelle Navigation
+```cmd
+cd ~                            # Zu User Home (C:\Users\username\)
+cd %USERPROFILE%                # Auch zu User Home
+cd %APPDATA%                    # Zu AppData Ordner
+```
+
+### Tab-Completion
+- Anfang tippen + **TAB** drücken = Auto-Complete! 🎯
+- Beispiel: `cd Pro` + TAB → `cd Projects\`
+
+### History durchsuchen
+- **Pfeil hoch/runter** = Durch Commands scrollen
+- **F7** = Zeigt Command-History als Liste!
+
+### Command abbrechen
+- **Ctrl + C** = Stoppt laufenden Command/Programm
+- **Ctrl + Z** (dann Enter) = EOF Signal
+
+### Copy & Paste im Terminal
+- **Rechtsklick** = Paste (in neueren Windows Terminals)
+- **Ctrl + Shift + C** = Copy (in Windows Terminal)
+- **Ctrl + Shift + V** = Paste (in Windows Terminal)
+
+---
+
+## 🎯 HÄUFIGE WORKFLOWS
+
+### Neues Projekt starten
+```cmd
+cd C:\Projects
+mkdir new-project
+cd new-project
+git init
+code .                          # Öffnet VS Code (wenn installiert)
+```
+
+### Code testen & pushen
+```cmd
+cd C:\Projects\project-name
+streamlit run app.py            # Lokal testen
+# Ctrl + C zum Stoppen
+git add .
+git commit -m "Updated feature"
+git push
+```
+
+### Morgen-Routine (auf anderem PC)
+```cmd
+cd C:\Projects\project-name
+git pull                        # Neueste Version holen
+streamlit run app.py            # Weiterarbeiten
+```
+
+### Cleanup
+```cmd
+cd C:\Projects
+dir                             # Was ist alles da?
+rmdir /s /q old-project         # Altes Projekt löschen
+del *.log                       # Log-Files aufräumen
+```
+
+---
+
+## 🆘 PROBLEM-SOLVING
+
+### "Command not found" / "Befehl nicht erkannt"
+→ Software nicht installiert oder nicht im PATH
+```cmd
+where python                    # Findet python.exe Location
+where git                       # Findet git.exe Location
+```
+
+### Terminal "hängt"
+→ **Ctrl + C** drücken zum Abbrechen
+
+### Falscher Ordner
+```cmd
+cd                              # Zeigt wo du bist
+cd C:\Projects                  # Zurück zu Projects
+```
+
+### Lange Pfade mit Leerzeichen
+```cmd
+cd "C:\Program Files\App Name"  # Mit Anführungszeichen!
+```
+
+---
+
+## 📊 VERGLEICH: DOS vs. HEUTE
+
+| Funktion | DOS (1990s) | Windows CMD (heute) | Git Bash | PowerShell |
+|----------|-------------|---------------------|----------|------------|
+| List files | `dir` | `dir` | `ls` | `dir` / `ls` |
+| Change dir | `cd` | `cd` | `cd` | `cd` |
+| Clear | `cls` | `cls` | `clear` | `cls` / `clear` |
+| Copy | `copy` | `copy` | `cp` | `Copy-Item` |
+| Delete | `del` | `del` | `rm` | `Remove-Item` |
+
+**Du kannst auch:** Git Bash verwenden (kommt mit Git) - das hat Unix-Commands wie `ls`, `rm`, etc.
+
+---
+
+## 💡 PRO TIPS
+
+1. **Tab ist dein Freund** - Nutze Tab-Completion für alles!
+2. **Pfeil-Hoch** - Wiederhole Commands, don't retype!
+3. **F7** - Command-History als scrollbare Liste
+4. **Drag & Drop** - Datei/Ordner ins Terminal ziehen = Pfad einfügen!
+5. **`cd /d`** - Wechselt Laufwerk UND Ordner in einem Schritt
+6. **Windows Terminal** - Moderne Terminal-App (besser als alte CMD)
+
+---
+
+## 🎮 DAS "ICH BIN EIN DOS VETERAN" STARTER PACK
+
+```cmd
+C:
+cd \
+dir /w
+cd Projects
+dir *.py /s
+cls
+cd position-calculator-matrix
+type README.md
+streamlit run position_calculator_streamlit.py
+```
+
+**Welcome back to the command line, OG!** 💚💻
+
+---
+
+**Speichere als: `C:\Projects\TERMINAL_CHEAT_SHEET.md`**
